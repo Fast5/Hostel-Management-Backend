@@ -3,6 +3,7 @@ const Admin = require("../mongoDB/Models/Admin");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const Room = require("../mongoDB/Models/Room");
+const Student = require("../mongoDB/Models/Student");
 
 const router=express.Router();
 
@@ -114,7 +115,7 @@ router.post("/addRoom", function(req, res){
     // }
 });
 
-//get rooms (As for now, only admin)
+//get rooms (As for now, only admin, later can also be used by hostel staff)
 router.get("/allRooms", function(req, res){
     const {token}=req.cookies;
 
@@ -181,6 +182,233 @@ router.put("/editRoom", function(req, res){
                     .then(async()=>{
                         res.status(200).json({"rooms": await Room.find(), "success": "Updated successfully."})
                     });
+                }
+            }
+        });
+    }
+});
+
+//Add student
+router.post("/addStudent", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+
+                if(role==='admin'){   //only admin can add a student
+
+                    await Student.findOne({ username:req.body.username })
+                    .then((foundUser)=>{
+                        if(foundUser){
+                            res.status(403).json({"error": "User already exists." });
+                        }
+                        else{
+                            bcrypt.hash(req.body.password, 10, function(err, hash){
+                                if(err){
+                                    console.log(err);
+                                }
+                                else{
+                                    const student=new Student({
+                                        name: req.body.name,
+                                        rollNo: req.body.rollNo,
+                                        phoneNo: req.body.phoneNo,
+                                        guardianName: req.body.guardianName,
+                                        guardianPhoneNo: req.body.guardianPhoneNo,
+                                        username: req.body.username,
+                                        password: hash,
+                                        complaints: [],
+                                        roomId: null
+                                    });
+
+                                    student.save().then(async()=>{
+                                        res.status(200).json({"students": await Student.find(), "success": "Student added."});
+                                    })
+                                    .catch=(err)=>{
+                                        res.status(500).json({"error": err});
+                                    };
+                                }
+                            });
+                        }
+                    });
+                }
+                // else{
+                    //Unauthorized User (student trying to add student)
+                // }
+            }
+        });
+    }
+    // else{
+        // logged out
+    // }   
+});
+
+//get students (As for now, only admin, later can also be used by hostel staff)
+router.get("/allStudents", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+                if(role==='admin'){   //abhi ke liye only admin
+                    res.json(await Student.find());
+                }
+            }
+        });
+    }
+});
+
+//delete student 
+router.delete("/deleteStudent", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+                
+                if(role==='admin'){   
+                    
+                    await Student.deleteOne({_id: req.body.id})
+                    .then(async()=>{
+                        res.status(200).json({"students": await Student.find(), "success": "Student deleted."});
+                    })
+                }
+            }
+        });
+    } 
+});
+
+//edit student (now only for admin, but roomNo is provided by hostel staff)
+router.put("/editStudent", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+                
+                if(role==='admin'){   
+                
+                    const originalStudent=await Student.findById(req.body._id);
+                    
+                    if(req.body.password===originalStudent.password && req.body.username===originalStudent.username){       //password & username is not changed
+                        console.log("none of them are updatde")
+                        await Student.replaceOne({_id: req.body._id}, {
+                            name: req.body.name,
+                            rollNo: req.body.rollNo,
+                            phoneNo: req.body.phoneNo,
+                            guardianName: req.body.guardianName,
+                            guardianPhoneNo: req.body.guardianPhoneNo,
+                            username: req.body.username,
+                            password: originalStudent.password,
+                            complaints: [],
+                            roomId: null
+                        })
+                        .then(async()=>{
+                            res.status(200).json({"students": await Student.find(), "success": "Updated successfully."});
+                        });
+                    }
+                    else{  //we need to hash the new password and new username must not be already present already and then update
+                        if(req.body.password!==originalStudent.password && req.body.username!==originalStudent.username){
+                            // console.log("both of them are updatde")
+
+                            await Student.findOne({ username:req.body.username })
+                            .then((foundUser)=>{
+                                if(foundUser){
+                                    res.status(403).json({"error": "User already exists." });
+                                }
+                                else{
+                                    bcrypt.hash(req.body.password, 10, async function(err, hash){
+                                        if(err){
+                                            console.log(err);
+                                        }
+                                        else{
+                                            await Student.replaceOne({_id: req.body._id}, {
+                                                name: req.body.name,
+                                                rollNo: req.body.rollNo,
+                                                phoneNo: req.body.phoneNo,
+                                                guardianName: req.body.guardianName,
+                                                guardianPhoneNo: req.body.guardianPhoneNo,
+                                                username: req.body.username,
+                                                password: hash,
+                                                complaints: [],
+                                                roomId: null
+                                            })
+                                            .then(async()=>{
+                                                res.status(200).json({"students": await Student.find(), "success": "Updated successfully."});
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                        else if(req.body.username!==originalStudent.username){  //only username is changed
+                            // console.log("username updatde")
+
+                            await Student.findOne({ username:req.body.username})
+                            .then(async (foundUser)=>{
+                                if(foundUser){
+                                    res.status(403).json({"error": "User already exists." });
+                                }
+                                else{
+                                    await Student.replaceOne({_id: req.body._id}, {
+                                        name: req.body.name,
+                                        rollNo: req.body.rollNo,
+                                        phoneNo: req.body.phoneNo,
+                                        guardianName: req.body.guardianName,
+                                        guardianPhoneNo: req.body.guardianPhoneNo,
+                                        username: req.body.username,
+                                        password: req.body.password,
+                                        complaints: [],
+                                        roomId: null
+                                    })
+                                    .then(async()=>{
+                                        res.status(200).json({"students": await Student.find(), "success": "Updated successfully."});
+                                    });
+                                }
+                            })
+                        }
+                        else{  //only password is changed
+                            // console.log("padssword updatde")
+
+                            bcrypt.hash(req.body.password, 10, async function(err, hash){
+                                if(err){
+                                    console.log(err);
+                                }
+                                else{
+                                    await Student.replaceOne({_id: req.body._id}, {
+                                        name: req.body.name,
+                                        rollNo: req.body.rollNo,
+                                        phoneNo: req.body.phoneNo,
+                                        guardianName: req.body.guardianName,
+                                        guardianPhoneNo: req.body.guardianPhoneNo,
+                                        username: req.body.username,
+                                        password: hash,
+                                        complaints: [],
+                                        roomId: null
+                                    })
+                                    .then(async()=>{
+                                        res.status(200).json({"students": await Student.find(), "success": "Updated successfully."});
+                                    });
+                                }
+                            });   
+                        }
+                    }
                 }
             }
         });
