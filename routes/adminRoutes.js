@@ -95,7 +95,8 @@ router.post("/addRoom", function(req, res){
                         roomNo: req.body.roomNo,
                         hostel: req.body.hostel,
                         accomodationType: req.body.accomodationType,
-                        accomodable: true //can only be changed by hostel staff
+                        // accomodable: true, //can only be changed by hostel staff
+                        occupants: []  //initially no student are allocated a room
                     });
 
                     room.save().then(async()=>{
@@ -111,28 +112,8 @@ router.post("/addRoom", function(req, res){
             }
         });
     }
-    // else{
-            //logged out
-    // }
-});
-
-//get rooms (As for now, only admin, later can also be used by hostel staff)
-router.get("/allRooms", function(req, res){
-    const {token}=req.cookies;
-
-    if(token){
-        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
-            if(err){
-                console.log(err);
-            }
-            else{
-                const {role}=user;
-
-                if(role==='admin'){   //abhi ke liye only admin
-                    res.json(await Room.find());
-                }
-            }
-        });
+    else{
+        // res.redirect("https://stackoverflow.com/questions/4062260/nodejs-redirect-url");
     }
 });
 
@@ -177,7 +158,8 @@ router.put("/editRoom", function(req, res){
                         roomNo: req.body.roomNo,
                         hostel: req.body.hostel,
                         accomodationType: req.body.accomodationType,
-                        accomodable: true
+                        // accomodable: true,
+                        occupants: []
                     })
                     .then(async()=>{
                         res.status(200).json({"rooms": await Room.find(), "success": "Updated successfully."})
@@ -245,25 +227,6 @@ router.post("/addStudent", function(req, res){
     // else{
         // logged out
     // }   
-});
-
-//get students (As for now, only admin, later can also be used by hostel staff)
-router.get("/allStudents", function(req, res){
-    const {token}=req.cookies;
-
-    if(token){
-        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
-            if(err){
-                console.log(err);
-            }
-            else{
-                const {role}=user;
-                if(role==='admin'){   //abhi ke liye only admin
-                    res.json(await Student.find());
-                }
-            }
-        });
-    }
 });
 
 //delete student 

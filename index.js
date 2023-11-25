@@ -8,6 +8,9 @@ const adminRoutes=require("./routes/adminRoutes");
 const studentRoutes=require("./routes/studentRoutes");
 const hostelStaffRoutes=require("./routes/hostelStaffRoutes");
 const Admin = require("./mongoDB/Models/Admin");
+const Student = require("./mongoDB/Models/Student");
+const HostelStaff = require("./mongoDB/Models/HostelStaff");
+const Room = require("./mongoDB/Models/Room");
 
 const app=express();
 
@@ -22,8 +25,8 @@ app.use(cors({
 app.use(cookieParser());
 
 app.use("/api/admin", adminRoutes);
-// app.use("/api/student", studentRoutes);
-// app.use("/api/hostelStaff", hostelStaffRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/hostelStaff", hostelStaffRoutes);
 
 //fetching user from token
 app.get("/profile", function(req, res){
@@ -41,9 +44,14 @@ app.get("/profile", function(req, res){
                     const {name, username, _id}=await Admin.findById(user.id);
                     res.json({name, username, _id, role});
                 }
-                // else if(role==='student'){
-
-                // }
+                else if(role==='student'){
+                    const {name, rollNo, phoneNo, guardianName, guardianPhoneNo, username, password, complaints, roomId}=await Student.findById(user.id);
+                    res.json({name, rollNo, phoneNo, guardianName, guardianPhoneNo, username, password, complaints, roomId, role});
+                }
+                else if(role==='hostelStaff'){
+                    const {name, username, _id, hostel}=await HostelStaff.findById(user.id);
+                    res.json({name, username, _id, hostel, role});
+                }
             }
         });
     }
@@ -51,6 +59,50 @@ app.get("/profile", function(req, res){
     //     if logged out
     // }
 });
+
+//get rooms
+app.get("/allRooms", function(req, res){
+    const {token}=req.cookies;
+
+    // console.log(token);
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                res.json(await Room.find());
+            }
+        });
+    }
+    else{
+        ///HANDLE WITH 404 PAGE
+    }
+});
+
+//get students
+app.get("/allStudents", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{    
+                // const {role}=user;
+                // if(role==='admin'){   //abhi ke liye only admin
+                    res.json(await Student.find());
+                // }
+            }
+        });
+    }
+    else{
+        //handle with 404
+    }
+});
+
 
 //logout
 app.get("/logout", function(req, res){

@@ -8,7 +8,7 @@ const studentSchema=new mongoose.Schema({
     guardianPhoneNo: {type: String, required: true},
     username: {type: String, required: true}, //must be unique checked while adding
     password: {type: String, required: true},
-    complaints: [String],
+    // complaints: [String], iska alag schema hii bana dete hai with userId and time and data included.
     roomId: {type: mongoose.Schema.Types.ObjectId, ref: 'Room'}  //will be provided by the hostel staff
 });
 
