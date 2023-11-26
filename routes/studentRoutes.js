@@ -2,6 +2,7 @@ const express=require("express");
 const bcrypt=require("bcrypt");
 const jwt=require("jsonwebtoken");
 const Student = require("../mongoDB/Models/Student");
+const Complaint = require("../mongoDB/Models/Complaint");
 
 const router=express.Router();
 
@@ -39,6 +40,43 @@ router.post("/login", async function(req, res){
     }
     catch(err){
         console.log(err);
+    }
+});
+
+//register complaint
+router.post("/registerComplaint", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role, id}=user;
+
+                if(role==='student'){
+                    try{
+                        // console.log(req.body);
+                        // const complaint=new Complaint({
+                        //     type: req.body.type,
+                        //     details: req.body.details,
+                        //     status: req.body.status,
+                        //     dateTime: req.body.dateTime,
+                        //     phoneNo: req.body.phoneNo,
+                        //     studentId: id,
+                        //     roomId: req.body.roomId
+                        // });    
+                    }
+                    catch(error){
+                        console.log(error);
+                    }
+                }
+                // else{
+                //     //unauthorized user
+                // }
+            }
+        });
     }
 });
 

@@ -24,14 +24,16 @@ app.use(cors({
 //cookies
 app.use(cookieParser());
 
+
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
 app.use("/api/hostelStaff", hostelStaffRoutes);
 
 //fetching user from token
 app.get("/profile", function(req, res){
+    
     const {token}=req.cookies;
-
+        // console.log("PROFILE ****** token :", token);
     if(token){
         jwt.verify(token, process.env.SECRET, {}, async function(err, user){
             if(err){
@@ -62,9 +64,8 @@ app.get("/profile", function(req, res){
 
 //get rooms
 app.get("/allRooms", function(req, res){
-    const {token}=req.cookies;
 
-    // console.log(token);
+    const {token}=req.cookies;
 
     if(token){
         jwt.verify(token, process.env.SECRET, {}, async function(err, user){
@@ -77,6 +78,7 @@ app.get("/allRooms", function(req, res){
         });
     }
     else{
+        console.log("called");
         ///HANDLE WITH 404 PAGE
     }
 });
@@ -106,7 +108,8 @@ app.get("/allStudents", function(req, res){
 
 //logout
 app.get("/logout", function(req, res){
-    res.cookie("token", "").json({"success": "Logout Successful."});
+    // res.cookie("token", "").json({"success": "Logout Successful."});
+    res.clearCookie("token").json({"success": "Logout successful."});
 });
 
 try{

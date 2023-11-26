@@ -84,6 +84,9 @@ router.put("/allocateRoom", function(req, res){
                         res.status(500).json({"error": "Internal Server Error"});
                     }
                 }
+                else{
+                    //Not allowed
+                }
             }
         });
     }
