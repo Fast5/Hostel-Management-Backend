@@ -41,30 +41,37 @@ router.post("/login", async function(req, res){
     }
     catch(err){
         console.log(err);
+        res.status(500).json({"error": "Something went wrong."});
     }
 });
 
 
 //allocate room
 router.put("/allocateRoom", function(req, res){
-    const {token}=req.cookies;
-
-    if(token){
-        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
-            if(err){
-                console.log(err);
-            }
-            else{
-                const {role}=user;
-                
-                if(role==='hostelStaff'){   
-                    try{
+    try{
+        const {token}=req.cookies;
+    
+        if(token){
+            jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+                if(err){
+                    console.log(err);
+                    res.status(401).json({"error": "Unauthorized acces not allowed."});
+                }
+                else{
+                    const {role}=user;
+                    
+                    if(role==='hostelStaff'){   
                         await Room.replaceOne({_id: req.body.id}, {
                             roomNo: req.body.roomNo,
                             hostel: req.body.hostel,
                             accomodationType: req.body.accomodationType,
                             // accomodable: req.body.accomodable,
                             occupants: req.body.occupants
+                        });
+                        
+                        //room is being updated if previously someone stayed then make their roomId null
+                        await Student.updateMany({"roomId": req.body.id}, {
+                            $set: {"roomId": null}
                         });
                         
                         await Student.updateOne({"_id": req.body.occupants[0]}, {
@@ -77,18 +84,69 @@ router.put("/allocateRoom", function(req, res){
                             });    
                         }
 
-                        res.status(200).json({"rooms": await Room.find(), "students": await Student.find(), "success": "Updated successfully."})
+                        res.status(200).json({"rooms": await Room.find(), "students": await Student.find(), "success": "Room Allocated."})
                     }
-                    catch(error){
-                        console.error(error);
-                        res.status(500).json({"error": "Internal Server Error"});
+                    else{
+                        res.status(401).json({"error": "Unauthorized acces not allowed."});
                     }
+                }
+            });
+        }
+        else{
+            res.status(401).json({"error": "Unauthorized acces not allowed."});
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({"error": "Something went wrong."});
+    }
+});
+
+//deallocate room
+router.put("/deallocateRoom", function(req, res){
+    try{
+        const {token}=req.cookies;
+    
+        if(token){
+            jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+                if(err){
+                    console.log(err);
+                    res.status(401).json({"error": "Unauthorized acces not allowed."});
                 }
                 else{
-                    //Not allowed
+                    const {role}=user;
+                    
+                    if(role==='hostelStaff'){   
+                        // try{
+                            await Room.updateOne({_id: req.body.id}, {
+                                $set: {"occupants": []}
+                            });
+    
+                            await Student.updateMany({"roomId": req.body.id}, {
+                                $set: {"roomId": null}
+                            });
+    
+    
+                            res.status(200).json({"rooms": await Room.find(), "students": await Student.find(), "success": "Room Unallocated."})
+                        // }
+                        // catch(error){
+                        //     console.error(error);
+                        //     res.status(500).json({"error": "Internal Server Error"});
+                        // }
+                    }
+                    else{
+                        res.status(401).json({"error": "Unauthorized acces not allowed."});
+                    }
                 }
-            }
-        });
+            });
+        }
+        else{
+            res.status(401).json({"error": "Unauthorized acces not allowed."});
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({"error": "Something went wrong."});
     }
 });
 

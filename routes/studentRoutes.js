@@ -40,53 +40,65 @@ router.post("/login", async function(req, res){
     }
     catch(err){
         console.log(err);
+        res.status(500).json({"error": "Something went wrong."});
     }
 });
 
 //register complaint
 router.post("/registerComplaint", function(req, res){
-    const {token}=req.cookies;
+    try{
 
-    if(token){
-        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
-            if(err){
-                console.log(err);
-            }
-            else{
-                const {role, id}=user;
-
-                if(role==='student'){
-                    try{
-                        const complaint=new Complaint({
-                            type: req.body.type,
-                            details: req.body.details,
-                            status: req.body.status,
-                            dateTime: req.body.dateTime,
-                            phoneNo: req.body.phoneNo,
-                            studentId: id,
-                            roomId: req.body.roomId
-                        });    
-
-                        complaint.save().then(async(recentComplaint)=>{
-                            await Student.updateOne({"_id": id}, {
-                                $push: {"complaints": recentComplaint._id}
-                            });
-
-                            res.status(200).json({"complaints": await Complaint.find(), "success": "Complaint registered."})
-                        })
-                        .catch=()=>{
-                            res.status(500).json({"error": err});
-                        }
+        const {token}=req.cookies;
+    
+        if(token){
+            jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+                if(err){
+                    console.log(err);
+                    res.status(401).json({"error": "Unauthorized acces not allowed."});
+                }
+                else{
+                    const {role, id}=user;
+    
+                    if(role==='student'){
+                        // try{
+                            const complaint=new Complaint({
+                                type: req.body.type,
+                                details: req.body.details,
+                                status: req.body.status,
+                                dateTime: req.body.dateTime,
+                                phoneNo: req.body.phoneNo,
+                                studentId: id,
+                                roomId: req.body.roomId
+                            });    
+    
+                            complaint.save().then(async(recentComplaint)=>{
+                                await Student.updateOne({"_id": id}, {
+                                    $push: {"complaints": recentComplaint._id}
+                                });
+    
+                                res.status(200).json({"complaints": await Complaint.find(), "userInfo": await Student.findById(id), "success": "Complaint registered."})
+                            })
+                            .catch=()=>{
+                                res.status(500).json({"error": err});
+                            }
+                        // }
+                        // catch(error){
+                        //     console.log(error);
+                        // }
                     }
-                    catch(error){
-                        console.log(error);
+                    else{
+                        res.status(401).json({"error": "Unauthorized acces not allowed."});
                     }
                 }
-                // else{
-                //     //unauthorized user
-                // }
-            }
-        });
+            });
+        }
+        else{
+            res.status(401).json({"error": "Unauthorized acces not allowed."});
+        }
+    }
+    catch(err){
+        console.log(err);
+        res.status(500).json({"error": "Something went wrong."});
     }
 });
 
