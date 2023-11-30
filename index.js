@@ -11,6 +11,7 @@ const Admin = require("./mongoDB/Models/Admin");
 const Student = require("./mongoDB/Models/Student");
 const HostelStaff = require("./mongoDB/Models/HostelStaff");
 const Room = require("./mongoDB/Models/Room");
+const Complaint = require("./mongoDB/Models/Complaint");
 
 const app=express();
 
@@ -23,7 +24,6 @@ app.use(cors({
 }));
 //cookies
 app.use(cookieParser());
-
 
 app.use("/api/admin", adminRoutes);
 app.use("/api/student", studentRoutes);
@@ -105,6 +105,66 @@ app.get("/allStudents", function(req, res){
     }
 });
 
+//get complaints (for student and hostel staff)
+app.get("/allComplaints", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+                if(role==='student' || role==='hostelStaff'){
+                    res.json(await Complaint.find());
+                }
+                else{
+                    //unauthorized
+                }
+            }
+        });
+    }
+    else{
+        //handle with 404
+    }
+});
+
+app.put("/editComplaint", function(req, res){
+    const {token}=req.cookies;
+
+    if(token){
+        jwt.verify(token, process.env.SECRET, {}, async function(err, user){
+            if(err){
+                console.log(err);
+            }
+            else{
+                const {role}=user;
+
+                if(role==='student' || role==='hostelStaff'){
+                    try{
+                        await Complaint.updateOne({"_id": req.body._id}, {
+                            $set: {"status": req.body.status}
+                        });
+                        // .then(async()=>{
+                            res.status(200).json({"complaints": await Complaint.find(), "success": "Complaint updated."});
+                        // });
+                    }
+                    catch(err){
+                        console.log(err);
+                        res.status(500).json({"error": "Internal Server Error"});
+                    }
+                }
+                else{
+                    //unauthorized
+                }
+            }
+        });
+    }
+    else{
+        //handle with 404
+    }
+});
 
 //logout
 app.get("/logout", function(req, res){

@@ -6,7 +6,8 @@ const complaintSchema=new mongoose.Schema({
     type: {type: String, required: true},
     details: {type: String},
     status: {type: String, required: true},
-    dateTime: {type: Date, required: true},
+    // dateTime: {type: Date, required: true},
+    dateTime: {type: String, required: true},
     phoneNo: {type: String, required: true},
     studentId: {type: mongoose.Schema.Types.ObjectId, ref: 'Student'},
     roomId: {type: mongoose.Schema.Types.ObjectId, ref: 'Room'}

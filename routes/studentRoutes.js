@@ -57,16 +57,26 @@ router.post("/registerComplaint", function(req, res){
 
                 if(role==='student'){
                     try{
-                        // console.log(req.body);
-                        // const complaint=new Complaint({
-                        //     type: req.body.type,
-                        //     details: req.body.details,
-                        //     status: req.body.status,
-                        //     dateTime: req.body.dateTime,
-                        //     phoneNo: req.body.phoneNo,
-                        //     studentId: id,
-                        //     roomId: req.body.roomId
-                        // });    
+                        const complaint=new Complaint({
+                            type: req.body.type,
+                            details: req.body.details,
+                            status: req.body.status,
+                            dateTime: req.body.dateTime,
+                            phoneNo: req.body.phoneNo,
+                            studentId: id,
+                            roomId: req.body.roomId
+                        });    
+
+                        complaint.save().then(async(recentComplaint)=>{
+                            await Student.updateOne({"_id": id}, {
+                                $push: {"complaints": recentComplaint._id}
+                            });
+
+                            res.status(200).json({"complaints": await Complaint.find(), "success": "Complaint registered."})
+                        })
+                        .catch=()=>{
+                            res.status(500).json({"error": err});
+                        }
                     }
                     catch(error){
                         console.log(error);

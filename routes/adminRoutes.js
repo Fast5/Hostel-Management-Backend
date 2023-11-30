@@ -248,6 +248,9 @@ router.delete("/deleteStudent", function(req, res){
                         res.status(200).json({"students": await Student.find(), "success": "Student deleted."});
                     })
                 }
+                else{
+                    //
+                }
             }
         });
     } 
@@ -534,7 +537,7 @@ router.put("/editHostelStaff", function(req, res){
                         else if(req.body.username!==originalStaff.username){  //only username is changed
                             // console.log("username updatde")
 
-                            await HostelStaff.findOne({ username:req.body.username})
+                            await HostelStaff.findOne({username: req.body.username})
                             .then(async (foundUser)=>{
                                 if(foundUser){
                                     res.status(403).json({"error": "User already exists." });
