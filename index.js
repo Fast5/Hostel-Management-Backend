@@ -201,12 +201,11 @@ app.put("/editComplaint", function(req, res){
 app.get("/logout", function(req, res){
     try{
         // console.log()
-        res.status(200).cookie("token", '').json({"success": "Logout successful."});
+        res.clearCookie("token", {secure: true, sameSite: "none", domain: "https://hostel-management-frontend-plum.vercel.app"}).json({"success": "Logout successful."});
     }
     catch(err){
         console.log(err);
         res.status(500).json({"error": "Something went wrong."}); 
-        res.end();
     }
 });
 
