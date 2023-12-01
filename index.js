@@ -18,7 +18,7 @@ const app=express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors({
-    origin: 'https://hostel-management-frontend-plum.vercel.app',
+    origin: 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'] 
 }));
@@ -200,7 +200,8 @@ app.put("/editComplaint", function(req, res){
 //logout
 app.get("/logout", function(req, res){
     try{
-        res.cookie('token', '').json({"success": "Logout successful."});
+        // console.log()
+        res.clearCookie("token").json({"success": "Logout successful."});
     }
     catch(err){
         console.log(err);
