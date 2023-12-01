@@ -18,7 +18,7 @@ const app=express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors({
-    origin: 'http://localhost:3000',
+    origin: 'https://hostel-management-frontend-plum.vercel.app',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'] 
 }));
