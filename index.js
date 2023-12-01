@@ -37,7 +37,7 @@ app.get("/profile", function(req, res){
             jwt.verify(token, process.env.SECRET, {}, async function(err, user){
                 if(err){
                     console.log(err);
-                    res.status(401).json({"error": "Unauthorized acces not allowed."});
+                    // res.status(401).json({"error": "Unauthorized acces not allowed."});
                 }
                 else{
                     const {role}=user;
