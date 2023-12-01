@@ -59,7 +59,7 @@ router.post("/login", async function(req, res){
                                     console.log(err);
                                 }
                                 else{
-                                    res.status(200).cookie("token", token, {secure: true, sameSite: "none", path: "/"}).json({"user": foundUser, "success": "Login successful."});
+                                    res.status(200).cookie("token", token, {secure: true, sameSite: "none"}).json({"user": foundUser, "success": "Login successful."});
                                 }
                             });
                         }
