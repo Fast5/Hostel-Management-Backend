@@ -23,7 +23,7 @@ router.post("/login", async function(req, res){
                                     console.log(err);
                                 }
                                 else{
-                                    res.status(200).cookie("token", token, {secure: true, sameSite: "none", domain: ".hostel-management-frontend-plum.vercel.app"}).json({"user": foundUser, "success": "Login successful."});
+                                    res.status(200).cookie("token", token, {secure: true, sameSite: "none", domain: ".hostel-management-backend.vercel.app"}).json({"user": foundUser, "success": "Login successful."});
                                 }
                             });
                         }
