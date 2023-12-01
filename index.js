@@ -200,7 +200,7 @@ app.put("/editComplaint", function(req, res){
 //logout
 app.get("/logout", function(req, res){
     try{
-        res.clearCookie("token", {secure: true, sameSite: "none"}).json({"success": "Logout successful."});
+        res.cookie('token', '').json({"success": "Logout successful."});
     }
     catch(err){
         console.log(err);
