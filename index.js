@@ -198,7 +198,7 @@ app.put("/editComplaint", function(req, res){
 });
 
 //logout
-app.post("/logout", function(req, res){
+app.get("/logout", function(req, res){
     try{
         res.clearCookie("token", {secure: true, sameSite: "none", path: "/", domain: ".hostel-management-frontend-plum.vercel.app"}).json({"success": "Logout successful."});
     }
