@@ -60,6 +60,7 @@ router.post("/login", async function(req, res){
                                 }
                                 else{
                                     res.status(200).cookie("token", token, {secure: true, sameSite: "none", path: "/", domain: ".hostel-management-backend.vercel.app"}).json({"user": foundUser, "success": "Login successful."});
+                                    // res.status(200).cookie("token", token, {secure: true, sameSite: "none"}).json({"user": foundUser, "success": "Login successful."});
                                 }
                             });
                         }
@@ -232,7 +233,7 @@ router.post("/addStudent", function(req, res){
                     const {role}=user;
     
                     if(role==='admin'){   //only admin can add a student
-                        await Student.findOne({ username:req.body.username })
+                        await Student.findOne({ $or: [{username: req.body.username}, {rollNo: req.body.rollNo}] })
                         .then((foundUser)=>{
                             if(foundUser){
                                 res.status(403).json({"error": "User already exists." });
