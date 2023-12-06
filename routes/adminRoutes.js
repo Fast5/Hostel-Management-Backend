@@ -392,10 +392,34 @@ router.put("/editStudent", function(req, res){
                                     }
                                 });
                             }
-                            else if(req.body.username!==originalStudent.username || req.body.rollNo!==originalStudent.rollNo){  //only username or rollNo is changed
+                            else if(req.body.username!==originalStudent.username){  //only username or rollNo is changed
                                 // console.log("username updatde")
     
-                                await Student.findOne({ $or: [{username: req.body.username}, {rollNo: req.body.rollNo}] })
+                                await Student.findOne({ username:req.body.username})
+                                .then(async (foundUser)=>{
+                                    if(foundUser){
+                                        res.status(403).json({"error": "User already exists." });
+                                    }
+                                    else{
+                                        await Student.replaceOne({_id: req.body._id}, {
+                                            name: req.body.name,
+                                            rollNo: req.body.rollNo,
+                                            phoneNo: req.body.phoneNo,
+                                            guardianName: req.body.guardianName,
+                                            guardianPhoneNo: req.body.guardianPhoneNo,
+                                            username: req.body.username,
+                                            password: req.body.password,
+                                            complaints: originalStudent.complaints,
+                                            roomId: originalStudent.roomId
+                                        })
+                                        .then(async()=>{
+                                            res.status(200).json({"students": await Student.find(), "success": "Updated successfully."});
+                                        });
+                                    }
+                                })
+                            }
+                            else if(req.body.rollNo!==originalStudent.rollNo){
+                                await Student.findOne({ rollNo:req.body.rollNo})
                                 .then(async (foundUser)=>{
                                     if(foundUser){
                                         res.status(403).json({"error": "User already exists." });
