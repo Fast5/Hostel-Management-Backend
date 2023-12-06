@@ -77,7 +77,7 @@ router.post("/registerComplaint", function(req, res){
                                     $push: {"complaints": recentComplaint._id}
                                 });
     
-                                res.status(200).json({"complaints": await Complaint.find(), "userInfo": await Student.findById(id), "success": "Complaint registered."})
+                                res.status(200).json({"complaints": await Complaint.find(), "userInfo": await Student.findById({id}), "success": "Complaint registered."})
                             })
                             .catch=()=>{
                                 res.status(500).json({"error": err});
