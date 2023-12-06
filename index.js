@@ -18,7 +18,7 @@ const app=express();
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 app.use(cors({
-    origin: 'https://hostel-management-frontend-plum.vercel.app',
+    origin: 'http://localhost:3000',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE'] 
 }));
@@ -34,11 +34,12 @@ app.use("/api/hostelStaff", hostelStaffRoutes);
 app.get("/profile", function(req, res){
     try{
         const {token}=req.cookies;
+        
         if(token){
             jwt.verify(token, process.env.SECRET, {}, async function(err, user){
                 if(err){
                     console.log(err);
-                    // res.status(401).json({"error": "Unauthorized acces not allowed."});
+                    res.status(401).json({"error": "Unauthorized acces not allowed."});
                 }
                 else{
                     const {role}=user;
@@ -55,14 +56,14 @@ app.get("/profile", function(req, res){
                         const {name, username, _id, hostel}=await HostelStaff.findById(user.id);
                         res.json({name, username, _id, hostel, role});
                     }
-                    // else{
-                    //     res.status(401).json({"error": "Unauthorized acces not allowed."});
-                    // }
+                    else{
+                        res.status(401).json({"error": "Unauthorized acces not allowed."});
+                    }
                 }
             });
         }
         else{
-            // res.status(401).json({"error": "Unauthorized acces not allowed."});
+            res.status(401).json({"error": "Unauthorized acces not allowed."});
         }
     }
     catch(err){
@@ -201,6 +202,7 @@ app.put("/editComplaint", function(req, res){
 app.post("/logout", function(req, res){
     try{
         res.clearCookie("token", {secure: true, sameSite: "none", path: "/", domain: ".hostel-management-backend.vercel.app"}).status(200).json({"success": "Logout successful."});
+        // res.clearCookie("token").status(200).json({"success": "Logout successful."});
     }
     catch(err){
         console.log(err);
