@@ -63,7 +63,7 @@ app.get("/profile", function(req, res){
             });
         }
         else{
-            res.status(401).json({"error": "Unauthorized acces not allowed."});
+            // res.status(401).json({"error": "Unauthorized acces not allowed."});
         }
     }
     catch(err){
