@@ -341,7 +341,7 @@ router.put("/editStudent", function(req, res){
                     
                         const originalStudent=await Student.findById(req.body._id);
                         
-                        if(req.body.password===originalStudent.password && req.body.username===originalStudent.username){       //password & username is not changed
+                        if(req.body.password===originalStudent.password && req.body.username===originalStudent.username && req.body.rollNo===originalStudent.rollNo){       //password & username & rollNo is not changed
                             // console.log("none of them are updatde")
                             await Student.replaceOne({_id: req.body._id}, {
                                 name: req.body.name,
@@ -359,10 +359,10 @@ router.put("/editStudent", function(req, res){
                             });
                         }
                         else{  //we need to hash the new password and new username must not be already present already and then update
-                            if(req.body.password!==originalStudent.password && req.body.username!==originalStudent.username){
+                            if(req.body.password!==originalStudent.password && req.body.username!==originalStudent.username && req.body.rollNo!==originalStudent.rollNo){
                                 // console.log("both of them are updatde")
     
-                                await Student.findOne({ username:req.body.username })
+                                await Student.findOne({ $or: [{username: req.body.username}, {rollNo: req.body.rollNo}] })
                                 .then((foundUser)=>{
                                     if(foundUser){
                                         res.status(403).json({"error": "User already exists." });
@@ -392,10 +392,10 @@ router.put("/editStudent", function(req, res){
                                     }
                                 });
                             }
-                            else if(req.body.username!==originalStudent.username){  //only username is changed
+                            else if(req.body.username!==originalStudent.username || req.body.rollNo!==originalStudent.rollNo){  //only username or rollNo is changed
                                 // console.log("username updatde")
     
-                                await Student.findOne({ username:req.body.username})
+                                await Student.findOne({ $or: [{username: req.body.username}, {rollNo: req.body.rollNo}] })
                                 .then(async (foundUser)=>{
                                     if(foundUser){
                                         res.status(403).json({"error": "User already exists." });
