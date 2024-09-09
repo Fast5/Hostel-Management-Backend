@@ -5,7 +5,7 @@ const complaintSchema=new mongoose.Schema({
     // roomNo: {type: Number, required: true},
     type: {type: String, required: true},
     details: {type: String},
-    status: {type: String, required: true},
+    status: {type: String, required: true, enum: ['open', 'resolved', 'Pending'], default: 'Pending'},
     // dateTime: {type: Date, required: true},
     dateTime: {type: String, required: true},
     phoneNo: {type: String, required: true},
