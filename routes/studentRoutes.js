@@ -72,7 +72,6 @@ router.post("/registerComplaint", function(req, res){
                                 roomId: req.body.roomId
                             });    
                             
-                            complaint.validateSync();
 
                             complaint.save().then(async(recentComplaint)=>{
                                 await Student.updateOne({"_id": id}, {
@@ -81,9 +80,9 @@ router.post("/registerComplaint", function(req, res){
     
                                 res.status(200).json({"userInfo": await Student.findById(id), "complaints": await Complaint.find(), "success": "Complaint registered."})
                             })
-                            .catch=()=>{
+                            .catch((err)=>{
                                 res.status(500).json({"error": err});
-                            }
+                            });
                         // }
                         // catch(error){
                         //     console.log(error);
