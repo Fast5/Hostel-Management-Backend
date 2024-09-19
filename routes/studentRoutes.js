@@ -71,7 +71,9 @@ router.post("/registerComplaint", function(req, res){
                                 studentId: id,
                                 roomId: req.body.roomId
                             });    
-    
+                            
+                            complaint.validateSync();
+
                             complaint.save().then(async(recentComplaint)=>{
                                 await Student.updateOne({"_id": id}, {
                                     $push: {"complaints": recentComplaint._id}
